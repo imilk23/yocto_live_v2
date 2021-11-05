@@ -47,3 +47,40 @@ vi meta-live/recipes-example/images/example-image.bb
 bitbake example-image
 ```
 
+## LESSON 3: Package dependencies and splitting
+1. Create lib
+```
+devtool add libanswer https://github.com/LetoThe2nd/libanswer
+bitbake libanswer
+devtool edit-recipe libanswer
+	add DEPENDS = “boost”
+    RDEPENDS_${PN} = “bc” 
+	devtool edit-recipe example-image
+		add	IMAGE_INSTALL += "libanswer"
+bitbake example-image
+runqemu qemuarm example-image nographic
+login : root
+ask
+poweroff
+bitbake -c cleansstate libanswer && bitbake libanswer
+```
+2. Runtime dependencies and compile time dependencies
+- DEPENDS: Build time package dependencies. eg: "boost"
+- RDEPENDS: Run time package dependencies. eg:  "bc"
+```
+DEPENDS = "boost"
+RDEPENDS_${PN} = "bc"
+```
+3. Package splitting
+```
+#split example out of package
+devtool edit-recipe libanswer
+	add	PACKAGES =+ "${PN}-example"
+		FILES_${PN}-example =+ " \
+			/usr/bin/ask \
+ 		"
+#add example in image recipe
+devtool edit-recipe example-image
+	add	IMAGE_INSTALL += "libanswer-example"
+```
+
