@@ -127,7 +127,7 @@ vi build/conf/bblayer.conf
 #	+ /home/binhht/workspace/yocto/sdk_ext/workspace \
 devtool build simplehello
 
-#TODO: devtool can not deploy binary in sdk_ext directory
+#FIXED: devtool can not deploy binary in sdk_ext directory (conflict env between poky/oe-init-build-env and sdk_ext/env...)
 cp -r sdk_ext/tmp/work/armv7vet2hf-neon-poky-linux-gnueabi/simplehello/ build/tmp/work/armv7vet2hf-neon-poky-linux-gnueabi/
 devtool deploy-target -s -c simplehello root@192.168.7.2
 ```
