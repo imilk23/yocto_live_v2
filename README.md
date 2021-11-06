@@ -84,3 +84,51 @@ devtool edit-recipe example-image
 	add	IMAGE_INSTALL += "libanswer-example"
 ```
 
+## LESSON 4:SDKS
+1. Add extra image configuration
+```
+# tools-sdk: make, gcc,..
+vi conf/local.conf
+	edit EXTRA_IMAGE_FEATURES ?= “ debug-tweaks tools-sdk”
+bitbake example-image
+runqemu qemuarm example-image nographic
+touch main.c
+#include<stdio.h>
+
+int main(void){
+    printf("Hello\n");
+    return 0;
+}
+gcc main.c
+```
+2. Build SDK
+When we don’t want native compile, so CROSS_COMPILE is another option.
+```
+vi conf/local.conf
+	edit EXTRA_IMAGE_FEATURES ?= "debug-tweaks ssh-server-dropbear"
+```
+```
+# option 1: classic sdk -> do manual building
+bitbake example-image -c populate_sdk
+./build/tmp/deploy/sdk/poky-glibc-x86_64-example-image-armv7vet2hf-neon-qemuarm-toolchain-3.1.11.sh
+```
+```
+# option 2: external sdk -> build with devtool
+bitbake example-image -c populate_sdk_ext
+./build/tmp/deploy/sdk/poky-glibc-x86_64-example-image-armv7vet2hf-neon-qemuarm-toolchain-ext-3.1.11.sh
+#=============================================================================
+#Enter target directory for SDK (default: ~/poky_sdk): ~/workspace/yocto/sdk_ext
+source ~/workspace/yocto/sdk_ext/environment-setup-armv7vet2hf-neon-poky-linux-gnueabi
+devtool add simplehello https://github.com/LetoThe2nd/simplehello.git
+# fix devtool workspace issues
+vi build/conf/bblayer.conf
+# edit
+#	- /home/binhht/workspace/yocto/build/workspace 
+#	+ /home/binhht/workspace/yocto/sdk_ext/workspace \
+devtool build simplehello
+
+#TODO: devtool can not deploy binary in sdk_ext directory
+cp -r sdk_ext/tmp/work/armv7vet2hf-neon-poky-linux-gnueabi/simplehello/ build/tmp/work/armv7vet2hf-neon-poky-linux-gnueabi/
+devtool deploy-target -s -c simplehello root@192.168.7.2
+```
+
