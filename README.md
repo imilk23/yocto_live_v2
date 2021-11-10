@@ -197,3 +197,37 @@ vi  meta-live/conf/machine/livearm.conf
 	IMAGE_CLASSES += "qemuboot"
 	IMAGE_FSTYPES += "ext4"
 ```
+
+## LESSON 7: Distros, machines, images and local.conf
+1. Distros introduction
+In short, distros are distribution of configuration files (glibc, libraries, toolchains,..)
+```
+# view bitbake environment
+bitbake -e core-image-minimal | less
+```
+
+2. Create new distro configuration
+```
+cd meta-live; mkdir conf/distro
+vi livedistro.conf
+# add
+	require conf/distro/poky.conf
+
+	DISTRO = "livedistro"
+	DISTRO_NAME = "livedistro (Yocto Live Coding Reference Distro)"
+	DISTRO_VERSION = "1.0.0"
+	DISTRO_CODENAME = "warrior"
+
+	DISTRO_FEATURES_append = " systemd pam"
+	VIRTUAL-RUNTIME_init_manager = "systemd"
+ 
+	DISTRO_FEATURES_BACKFILL_CONSIDERED = "sysvinit"
+
+	VIRTUAL-RUNTIME_initscripts = ""
+
+vi build/conf/local.conf
+# edit
+	DISTRO ?= "livedistro"
+
+bitbake core-image-minimal
+```
