@@ -132,3 +132,68 @@ cp -r sdk_ext/tmp/work/armv7vet2hf-neon-poky-linux-gnueabi/simplehello/ build/tm
 devtool deploy-target -s -c simplehello root@192.168.7.2
 ```
 
+## LESSON 5: Development workflows
+1. Build core-minimal-image
+```
+vi  build/conf/local.conf
+# add
+DISTRO_FEATURES_append = " systemd pam"
+VIRTUAL-RUNTIME_init_manager = "systemd"
+ 
+DISTRO_FEATURES_BACKFILL_CONSIDERED = "sysvinit"
+
+VIRTUAL-RUNTIME_initscripts = ""
+```
+2. Build core-image-full-cmdline
+
+## LESSON 6: Kernel handling and development
+1. Switch to a specific kernel
+```
+vi  build/conf/local.conf
+# add
+	PREFERRED_PROVIDER_virtual/kernel = "linux-yocto-rt"
+bitbake core-image-minimal
+
+vi  build/conf/local.conf
+# delete
+	PREFERRED_PROVIDER_virtual/kernel = "linux-yocto-rt"
+```
+2. Create new kernel recipes
+```
+mkdir meta-live/conf/machine
+cp poky/meta/conf/machine/qemuarm.conf meta-live/conf/machine/livearm.conf
+vi build/conf/local.conf
+# edit
+MACHINE ??= livearm
+```
+```
+#download kernel v4.14
+mkdir linux
+git clone git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git -b linux-4.14.y
+git show HEAD
+```
+```
+#create recipes-kernel
+cd meta-live; mkdir recipes-kernel
+cp -r poky/meta-skeleton/recipes-kernel/linux/ meta-live/recipes-kernel/
+mv linux-yocto-custom.bb linux-stable.bb
+mv linux-yocto-custom/ linux-stable/
+cp CD linux/arch/arm/configs/multi_v7_defconfig meta-live/recipes-kernel/linux-stable/defconfig
+vi meta-live/recipes-kernel/linux-stable.bb
+# edit
+SRC_URI = " \
+git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git;protocol=git;nocheckout=1;name=machine;branch=linux-4.14.y \
+	file://defconfig \
+"
+KCONFIG_MODE="--alldefconfig"
+LINUX_VERSION ?= "4.14.y"
+SRCREV_livearm="0447aa205abe1c0c016b4f7fa9d7c08d920b5c8e"
+PV = "4.14.254"
+COMPATIBLE_MACHINE = "livearm"
+
+vi  meta-live/conf/machine/livearm.conf
+# add
+	PREFERRED_PROVIDER_virtual/kernel = "linux-stable"
+	IMAGE_CLASSES += "qemuboot"
+	IMAGE_FSTYPES += "ext4"
+```
