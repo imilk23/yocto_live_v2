@@ -84,7 +84,7 @@ devtool edit-recipe example-image
 	add	IMAGE_INSTALL += "libanswer-example"
 ```
 
-## LESSON 4:SDKS
+## LESSON 4: SDKS
 1. Add extra image configuration
 ```
 # tools-sdk: make, gcc,..
@@ -230,4 +230,54 @@ vi build/conf/local.conf
 	DISTRO ?= "livedistro"
 
 bitbake core-image-minimal
+```
+
+## LESSON 8: Real hardware
+wic list images
+
+## LESSON 10: Building and customizing containers
+
+## LESSON 11: Getting started with C/C++ đevelopment
+1. Create target binary
+```
+mkdir noclue; cd noclue
+vi noclue.cpp
+#add 
+	#include <iostream>
+
+int main(){
+	std::cout << "you totally have no clue" << std::endl;
+	return 0;
+}
+
+vi CMakeLists.txt
+#add 
+cmake_minimum_required(VERSION 2.8)
+
+project(noclue)
+
+add_executable(noclue noclue.cpp)
+
+install(TARGETS noclue DESTINATION bin)
+
+cmake .
+make
+
+devtool add meta-live/noclue
+vi build/workspace/recipes/noclue/noclue.bb
+
+# make sure noclue directory is clear
+devtool reset noclue
+devtool add --no-same-dir meta-live/noclue
+bitbake noclue
+
+vi build/conf/local.conf
+#add
+CORE_IMAGE_EXTRA_INSTALL = "noclue"
+bitbake core-image-minimal
+runqemu livearm nographic slirp
+which noclue
+#/usr/bin/noclue
+
+poweroff
 ```
