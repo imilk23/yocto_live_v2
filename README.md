@@ -101,7 +101,7 @@ int main(void){
 }
 gcc main.c
 ```
-2. Build SDK
+2. Build SDK <br>
 When we don’t want native compile, so CROSS_COMPILE is another option.
 ```
 vi conf/local.conf
@@ -199,7 +199,7 @@ vi  meta-live/conf/machine/livearm.conf
 ```
 
 ## LESSON 7: Distros, machines, images and local.conf
-1. Distros introduction
+1. Distros introduction <br>
 In short, distros are distribution of configuration files (glibc, libraries, toolchains,..)
 ```
 # view bitbake environment
@@ -281,3 +281,32 @@ which noclue
 
 poweroff
 ```
+
+## LESSON 12: Project setup and kas
+1. Setup project manually
+```
+cd yocto
+git clone git://git.openembedded.org/meta-openembedded
+git clone git://git.yoctoproject.org/meta-ti
+git clone git://git.yoctoproject.org/meta-arm
+# check out to dunfell
+vi build/conf/bblayers.conf
+BBLAYERS ?= " \
+  /home/binhht/workspace/yocto/meta-ti \
+  /home/binhht/workspace/yocto/meta-arm/meta-arm-toolchain \
+  /home/binhht/workspace/yocto/meta-arm/meta-arm \
+  /home/binhht/workspace/yocto/meta-openembedded/meta-python \
+  /home/binhht/workspace/yocto/meta-openembedded/meta-oe \
+  /home/binhht/workspace/yocto/poky/meta \
+  /home/binhht/workspace/yocto/poky/meta-poky \
+  /home/binhht/workspace/yocto/poky/meta-yocto-bsp \
+  "
+	vi build/conf/local.conf
+MACHINE ??= "beaglebone"
+DISTRO  ??= "poky"
+
+bitbake core-image-minimal
+```
+2. Setup project with KAS <br>
+To be continued...
+
