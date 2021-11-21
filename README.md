@@ -309,4 +309,46 @@ bitbake core-image-minimal
 ```
 2. Setup project with KAS <br>
 To be continued...
-
+## LESSON 13: Building an out of tree kernel module
+1. Create new layer for hello module
+```
+bitbake-layers create-layer meta-praseodymium
+bitbake-layers add-layer meta-praseodymium
+cd meta-praseodymium; mkdir recipes-praseodymium
+cp -fvR ../../poky/meta-skeleton/recipes-kernel/hello-mod/ .
+cd recipes-praseodymium/
+mkdir images; cd images
+cp ../../../poky/meta/recipes-core/images/core-image-minimal.bb  .
+mv core-image-minimal.bb praseodymium-image.bb
+vi praseodymium-image.bb
+# edit
+	IMAGE_INSTALL = "packagegroup-core-boot ${CORE_IMAGE_EXTRA_INSTALL} hello-mod"
+bitbake praseodymium-image
+runqemu qemuarm nographic slirp
+cd /lib/modules/5.4.153-yocto-standard
+modprobe hello
+rmmod hello
+poweroff
+```
+2. Setup download source kernel module from git
+```
+cd meta-praseodymium/recipes-praseodymium/hello-mod
+rm -rf files/
+vi hello-mod_0.1.bb 
+SRC_URI = "git://github.com/theyoctojester/mod-praseodymium"
+SRCREV = "${AUTOREV}"
+S = "${WORKDIR}/git"
+RPROVIDES_${PN} += "kernel-module-praseodymium"
+mv hello-mod_0.1.bb mod-praseodymium_0.1.bb
+cd ..
+mv hello-mod/ mod-praseodymium/
+vi images/praseodymium-image.bb
+		IMAGE_INSTALL = "packagegroup-core-boot ${CORE_IMAGE_EXTRA_INSTALL} mod-praseodymium"
+bitbake praseodymium-image
+runqemu qemuarm nographic slirp
+cd /lib/modules/5.4.153-yocto-standard/extra
+modprobe praseodymium
+cat /sys/module/praseodymium/parameters/metal_level
+rmmod praseodymium
+poweroff
+```
