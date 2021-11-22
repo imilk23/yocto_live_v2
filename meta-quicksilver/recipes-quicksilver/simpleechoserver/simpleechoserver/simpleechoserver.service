@@ -1,0 +1,9 @@
+[Unit]
+Descriptioon=A simple echo server
+
+[Service]
+ExecStart=@BINDIR@/simple_echo_server 12345
+
+[Install]
+WantedBy=multi-user.target
+
